@@ -1,0 +1,1 @@
+docker build --build-arg ENV=$1 -t users/migrations .
