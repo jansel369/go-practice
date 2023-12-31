@@ -24,7 +24,13 @@ func main() {
 
 	router := gin.Default()
 
-	service.AuthRouter(router.Group("/auth"), &appCtx)
+	if config.ENV == "development" {
+		router.SetTrustedProxies([]string{"localhost", "0.0.0.0"})
+	}
+
+	apiGroup := router.Group("/api/v1")
+
+	service.AuthRouter(apiGroup.Group("/auth"), &appCtx)
 
 	router.Run(fmt.Sprintf(":%s", config.Port))
 }

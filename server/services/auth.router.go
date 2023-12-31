@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"net/http"
 	model "server/models"
 	"server/utils"
@@ -12,9 +13,10 @@ func AuthRouter(router *gin.RouterGroup, appCtx *utils.AppCtx) {
 
 	router.POST(
 		"/register",
-		utils.ValidateMiddleware(&model.UserRegisterInput{}),
+		utils.ValidateMiddleware(model.UserRegisterInput{}),
 		func(c *gin.Context,
 		) {
+			log.Printf("test here register")
 			var registerInput model.UserRegisterInput
 
 			readErr := c.BindJSON(&registerInput)

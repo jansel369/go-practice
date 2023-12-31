@@ -3,6 +3,8 @@ package model
 import (
 	"time"
 
+	_ "encoding/json"
+
 	"github.com/gin-gonic/gin"
 )
 

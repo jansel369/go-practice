@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,9 @@ func ValidateMiddleware(inputStruct interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := c.BindJSON(inputStruct); err != nil {
 
-			StatusInternalServerError("vmpl0x1", err).AbortRequest(c)
+			log.Printf("\n  val err 1: %s", err)
+
+			StatusInternalServerError("_val0x1", err).AbortRequest(c)
 
 			return
 		}
@@ -25,7 +28,11 @@ func ValidateMiddleware(inputStruct interface{}) gin.HandlerFunc {
 			errorMessages := make(map[string]string)
 
 			for _, fieldErr := range validationErrors {
-				errorMessages[fieldErr.Field()] = fmt.Sprintf("Field '%s' failed validation with tag '%s'", fieldErr.Field(), fieldErr.Tag())
+				errorMessages[fieldErr.Field()] = fmt.Sprintf(
+					"Field '%s' failed validation with tag '%s'",
+					fieldErr.Field(),
+					fieldErr.Tag(),
+				)
 			}
 
 			c.AbortWithStatusJSON(

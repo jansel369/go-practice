@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -42,10 +43,12 @@ func getEnv(envName string) string {
 }
 
 func readEnv() MigrationConfig {
-	err := godotenv.Load(".env")
+
+	APP_ENV := getEnv("APP_ENV")
+	err := godotenv.Load(fmt.Sprintf(".env.%s", APP_ENV))
 
 	if err != nil {
-		log.Fatalf("Error loging file .env %s", err)
+		log.Fatalf("Error loging file .env.%s %s", APP_ENV, err)
 	}
 
 	migrationConfig := MigrationConfig{
@@ -63,10 +66,10 @@ func main() {
 	flags.Parse(os.Args[1:])
 	args := flags.Args()
 
-	if len(args) < 2 {
-		flags.Usage()
-		return
-	}
+	// if len(args) < 2 {
+	// 	flags.Usage()
+	// 	return
+	// }
 
 	config := readEnv()
 	dbstring := fmt.Sprintf(
@@ -98,7 +101,13 @@ func main() {
 
 	// goose.RunWithOptions()
 
-	if err := goose.Run(command, db, *dir, arguments...); err != nil {
+	// if err := goose.RunContext(command, db, *dir, arguments...); err != nil {
+	// 	log.Fatalf("goose %v: %v", command, err)
+	// }
+
+	ctx := context.WithValue(context.TODO(), "dbname", config.dbname)
+
+	if err := goose.RunContext(ctx, command, db, "./migrations", arguments...); err != nil {
 		log.Fatalf("goose %v: %v", command, err)
 	}
 }
