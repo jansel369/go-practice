@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -72,6 +73,14 @@ func StatusInternalServerError(message string, err error) Err {
 }
 
 func (e Err) AbortRequest(c *gin.Context) {
+	log.Printf(
+		" => Abort Error %d %s: %s (%s)",
+		e.StatusCode,
+		e.StatusName,
+		*e.Message,
+		*e.MainError,
+	)
+
 	c.AbortWithStatusJSON(
 		e.StatusCode,
 		gin.H{

@@ -13,7 +13,7 @@ func AuthRouter(router *gin.RouterGroup, appCtx *utils.AppCtx) {
 
 	router.POST(
 		"/register",
-		utils.ValidateMiddleware(model.UserRegisterInput{}),
+		utils.ValidateMiddleware(&model.UserRegisterInput{}),
 		func(c *gin.Context,
 		) {
 			log.Printf("test here register")

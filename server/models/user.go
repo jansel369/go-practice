@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	_ "encoding/json"
+	_ "reflect"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +19,10 @@ type User struct {
 }
 
 type UserRegisterInput struct {
-	Name     string `json:name validate:required`
-	Password string `json:password validate:"required,lte=8"`
-	Email    string `json:email validate:"required,email"`
-	Age      int    `json:age validate:gte=18`
+	Name     string `json:"name" validate:"required"`
+	Password string `json:"password" validate:"required,lte=8"`
+	Email    string `json:"email" validate:"required,email"`
+	Age      int    `json:"age" validate:"gte=18"`
 }
 
 type UserLoginInput struct {

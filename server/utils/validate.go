@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
 )
 
-var validate *validator.Validate
+// var validate *validator.Validate
+var validate = validator.New()
 
-func ValidateMiddleware(inputStruct interface{}) gin.HandlerFunc {
+func ValidateMiddleware(model interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := c.BindJSON(inputStruct); err != nil {
+
+		if err := c.ShouldBindJSON(model); err != nil {
 
 			log.Printf("\n  val err 1: %s", err)
 
@@ -22,8 +25,18 @@ func ValidateMiddleware(inputStruct interface{}) gin.HandlerFunc {
 			return
 		}
 
+		log.Println(model)
+
 		// Use validator to check the request data
-		if err := validate.Struct(inputStruct); err != nil {
+		if err := validate.Struct(model); err != nil {
+			if as, ok := err.(*validator.InvalidValidationError); ok {
+				log.Printf(" => Invalid validation: %s %s\n", as, err)
+
+				StatusInternalServerError("_val0x2", err).AbortRequest(c)
+
+				return
+			}
+
 			validationErrors := err.(validator.ValidationErrors)
 			errorMessages := make(map[string]string)
 
@@ -46,6 +59,10 @@ func ValidateMiddleware(inputStruct interface{}) gin.HandlerFunc {
 			)
 			return
 		}
+
+		log.Printf(" => value: %v", reflect.ValueOf(model))
+
+		c.Set("body", model)
 
 		c.Next()
 	}
