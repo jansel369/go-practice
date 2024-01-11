@@ -1,18 +1,20 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Err struct {
 	Message    *string
 	StatusCode int
 	StatusName string
-	MainError  *error
+	MainError  error
 }
 
 type Result[T any] struct {
@@ -33,7 +35,7 @@ func StatusBadRequest(message string) Err {
 		Message:    &message,
 		StatusCode: http.StatusBadRequest,
 		StatusName: "BadRequest",
-		MainError:  nil,
+		MainError:  errors.New("bad request"),
 	}
 
 	return e
@@ -44,7 +46,7 @@ func StatusUnauthorized(message string) Err {
 		Message:    &message,
 		StatusCode: http.StatusUnauthorized,
 		StatusName: "Unauthorized",
-		MainError:  nil,
+		MainError:  errors.New("unauthorized"),
 	}
 
 	return e
@@ -55,7 +57,7 @@ func StatusNotFound(message string) Err {
 		Message:    &message,
 		StatusCode: http.StatusNotFound,
 		StatusName: "NotFound",
-		MainError:  nil,
+		MainError:  errors.New("not found"),
 	}
 
 	return e
@@ -66,10 +68,20 @@ func StatusInternalServerError(message string, err error) Err {
 		Message:    &message,
 		StatusCode: http.StatusInternalServerError,
 		StatusName: "InternalServerError",
-		MainError:  &err,
+		MainError:  err,
 	}
 
 	return e
+}
+
+func ORMError(errCode string, result *gorm.DB) *Err {
+	if !IsNotFound(result) && result.Error != nil {
+		e := StatusInternalServerError("rgu0x1", result.Error)
+
+		return &e
+	}
+
+	return nil
 }
 
 func (e Err) AbortRequest(c *gin.Context) {
@@ -78,7 +90,7 @@ func (e Err) AbortRequest(c *gin.Context) {
 		e.StatusCode,
 		e.StatusName,
 		*e.Message,
-		*e.MainError,
+		e.MainError,
 	)
 
 	c.AbortWithStatusJSON(

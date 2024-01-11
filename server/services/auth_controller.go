@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	model "server/models"
 	"server/utils"
 )
@@ -8,7 +9,7 @@ import (
 func RegisterUser(
 	user model.UserRegisterInput,
 	ctx *utils.AppCtx,
-) utils.Result[model.User] {
+) (*model.User, *utils.Err) {
 	var existingUser model.User
 
 	result := ctx.ORM.Where(
@@ -16,33 +17,24 @@ func RegisterUser(
 		user.Email,
 	).First(&existingUser)
 
-	if result.Error != nil {
-		e := utils.StatusInternalServerError("rgu0x1", result.Error)
-
-		return utils.Result[model.User]{
-			Data:  nil,
-			Error: &e,
-		}
-	}
-
-	if result.RowsAffected == 0 {
+	if result.RowsAffected > 0 {
 		e := utils.StatusBadRequest("User already exist")
 
-		return utils.Result[model.User]{
-			Data:  nil,
-			Error: &e,
-		}
+		return nil, &e
 	}
+
+	if ormErr := utils.ORMError("rgu0x1", result); ormErr != nil {
+		return nil, ormErr
+	}
+
+	log.Println(" => Users: ", existingUser)
 
 	hashedPass, hashErr := utils.HashPassword(user.Password)
 
 	if hashErr != nil {
 		e := utils.StatusInternalServerError("rgu0x2", hashErr)
 
-		return utils.Result[model.User]{
-			Data:  nil,
-			Error: &e,
-		}
+		return nil, &e
 	}
 
 	createUser := model.User{
@@ -56,13 +48,9 @@ func RegisterUser(
 
 	if createResult.Error != nil {
 		e := utils.StatusInternalServerError("rgu0x3", createResult.Error)
-		return utils.Result[model.User]{
-			Data:  nil,
-			Error: &e,
-		}
+
+		return nil, &e
 	}
 
-	return utils.Result[model.User]{
-		Data: &createUser,
-	}
+	return &createUser, nil
 }

@@ -1,0 +1,1 @@
+docker run users/migrations $1 -dir /migration/migrations

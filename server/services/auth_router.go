@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"net/http"
 	model "server/models"
 	"server/utils"
@@ -16,24 +15,19 @@ func AuthRouter(router *gin.RouterGroup, appCtx *utils.AppCtx) {
 		utils.ValidateMiddleware(&model.UserRegisterInput{}),
 		func(c *gin.Context,
 		) {
-			log.Printf("test here register")
 			var registerInput model.UserRegisterInput
-
-			readErr := c.BindJSON(&registerInput)
-
-			if readErr != nil {
-				utils.StatusInternalServerError("rgiuxr1", readErr).AbortRequest(c)
+			if !registerInput.FromBody(c) {
 				return
 			}
 
-			result := RegisterUser(registerInput, appCtx)
+			user, error := RegisterUser(registerInput, appCtx)
 
-			if result.Data == nil {
-				result.Error.AbortRequest(c)
+			if error != nil {
+				error.AbortRequest(c)
 				return
 			}
 
-			c.JSON(http.StatusOK, result.Data.Public())
+			c.JSON(http.StatusOK, user.Public())
 		},
 	)
 

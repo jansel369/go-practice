@@ -1,1 +1,1 @@
-docker run users/migrations $1 -dir /migration/migrations
+APP_ENV=development go run main.go $1 -dir /migrations

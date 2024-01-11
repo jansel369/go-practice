@@ -1,6 +1,9 @@
 package test
 
 import (
+	"encoding/json"
+	"net/http"
+
 	fastshot "github.com/opus-domini/fast-shot"
 )
 
@@ -8,6 +11,12 @@ func NewClient() fastshot.ClientHttpMethods {
 	builder := fastshot.NewClient("http://localhost:8001/api/v1")
 
 	return builder.Build()
+}
+
+func GetJson(response *http.Response, target interface{}) error {
+	defer response.Body.Close()
+
+	return json.NewDecoder(response.Body).Decode(target)
 }
 
 // func Request(method string, path *string, data map[string]any) (*map[string]any, *error) {

@@ -17,7 +17,7 @@ func Up00001(ctx context.Context, tx *sql.Tx) error {
 		ctx,
 		`
 			CREATE TABLE users (
-				id int NOT NULL PRIMARY KEY,
+				id SERIAL,
 				name VARCHAR(100),
 				email VARCHAR(100) UNIQUE,
 				password VARCHAR(255),
@@ -32,8 +32,6 @@ func Up00001(ctx context.Context, tx *sql.Tx) error {
 }
 
 func Down00001(ctx context.Context, tx *sql.Tx) error {
-
-	println("here text down 1")
 	_, err := tx.ExecContext(
 		ctx,
 		"DROP TABLE users;",

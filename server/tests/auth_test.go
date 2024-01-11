@@ -19,7 +19,7 @@ func TestAuth(t *testing.T) {
 	registerInput := model.UserRegisterInput{
 		Name:     "Andrew",
 		Password: "password",
-		Email:    "andrew@test.com",
+		Email:    "andrew1@test.com",
 		Age:      32,
 	}
 
@@ -41,5 +41,15 @@ func TestAuth(t *testing.T) {
 		t.Errorf("Post request error: %v", regErr)
 	}
 
-	t.Errorf("\n response %v", regRes.IsError())
+	var userResponse model.User
+
+	readErr := GetJson(regRes.RawResponse, &userResponse)
+
+	if readErr != nil {
+		t.Errorf("Read data error: %s", readErr)
+	}
+
+	if userResponse.Email != registerInput.Email {
+		t.Errorf("received: %v, expected: %v", userResponse.Email, registerInput.Email)
+	}
 }

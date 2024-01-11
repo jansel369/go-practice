@@ -1,21 +1,24 @@
 package model
 
 import (
+	"log"
+	"server/utils"
 	"time"
 
 	_ "reflect"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type User struct {
-	ID        *uint  `gorm:primaryKey json:id`
-	Name      string `json:name`
-	Email     string `json:email`
-	Password  string `json:password`
-	Age       int    `json:age`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint      `gorm:"primaryKey;autoIncrement:true" sql:"AUTO_INCREMENT" json:id`
+	Name      string    `json:name`
+	Email     string    `json:email`
+	Password  string    `json:password`
+	Age       int       `json:age`
+	CreatedAt time.Time `ogrm:"autoUpdateTime" json:createdAt`
+	UpdatedAt time.Time `json:updatedAt`
 }
 
 type UserRegisterInput struct {
@@ -55,4 +58,18 @@ func (u User) Public() map[string]any {
 
 func (u *User) SetPassword(hashedPassword string) {
 	u.Password = hashedPassword
+}
+
+func (u *UserRegisterInput) FromBody(c *gin.Context) bool {
+	err := c.ShouldBindBodyWith(u, binding.JSON)
+
+	if err != nil {
+		log.Printf("parse error: %s", err)
+
+		utils.StatusInternalServerError("fb_URI0x1", err).AbortRequest(c)
+
+		return false
+	}
+
+	return true
 }
