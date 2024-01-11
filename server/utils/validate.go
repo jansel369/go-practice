@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -60,22 +61,16 @@ func ValidateMiddleware(model interface{}) gin.HandlerFunc {
 			return
 		}
 
-		// log.Println(" => value:", model)
-
-		c.Set("body", model)
-
 		c.Next()
 	}
 }
 
-func FromBody(body *any, c *gin.Context) bool {
-	if getData, ok := c.Get("body"); ok {
+func FromBody(model interface{}, c *gin.Context) *Err {
+	if err := c.ShouldBindBodyWith(model, binding.JSON); err != nil {
+		err := StatusInternalServerError("_rdm0x1", errors.New("JSON binding faild"))
 
-		body = &getData
-
-		return true
+		return &err
 	}
 
-	StatusInternalServerError("fb-UR0x2", nil).AbortRequest(c)
-	return false
+	return nil
 }

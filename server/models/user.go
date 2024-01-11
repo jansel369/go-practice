@@ -12,7 +12,7 @@ import (
 )
 
 type User struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement:true" sql:"AUTO_INCREMENT" json:id`
+	ID        uint      `gorm:"primaryKey" json:id`
 	Name      string    `json:name`
 	Email     string    `json:email`
 	Password  string    `json:password`
@@ -23,14 +23,14 @@ type User struct {
 
 type UserRegisterInput struct {
 	Name     string `json:"name" validate:"required"`
-	Password string `json:"password" validate:"required,lte=8"`
+	Password string `json:"password" validate:"required,gte=8"`
 	Email    string `json:"email" validate:"required,email"`
 	Age      int    `json:"age" validate:"gte=18"`
 }
 
 type UserLoginInput struct {
-	Name     string `json:name validate:required`
-	Password string `json:password validate:"required,lte=8"`
+	Email    string `json:email validate:required`
+	Password string `json:password validate:"required,gte=2"`
 }
 
 func (User) TableName() string {

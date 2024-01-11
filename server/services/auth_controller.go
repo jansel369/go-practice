@@ -54,3 +54,33 @@ func RegisterUser(
 
 	return &createUser, nil
 }
+
+func LoginUser(
+	loginInput model.UserLoginInput,
+	ctx *utils.AppCtx,
+) (*model.User, *utils.Err) {
+	var existingUser model.User
+
+	result := ctx.ORM.Where(
+		"LOWER(email) = LOWER(?)",
+		loginInput.Email,
+	).First(&existingUser)
+
+	if result.RowsAffected == 0 {
+		e := utils.StatusBadRequest("No user found")
+
+		return nil, &e
+	}
+
+	if ormErr := utils.ORMError("rgu0x1", result); ormErr != nil {
+		return nil, ormErr
+	}
+
+	if !utils.ComparePasswords(existingUser.Password, loginInput.Password) {
+		e := utils.StatusBadRequest("Invalid email or password")
+
+		return nil, &e
+	}
+
+	return &existingUser, nil
+}
